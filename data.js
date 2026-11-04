@@ -1,4 +1,4 @@
-// Initial 30 Problem Statements from SIH 2025 Booklet (VVCE Ideathon)
+// 32 Problem Statements from SIH 2025 Booklet (VICE VERSE 2026)
 const INITIAL_PROBLEM_STATEMENTS = [
   {
     "id": "CS-01",
@@ -309,8 +309,8 @@ const INITIAL_PROBLEM_STATEMENTS = [
     "description": "Mines must continuously pump out water that collects in pits and underground workings, and this dewatering is one of the largest consumers of diesel and grid electricity in mining, adding to cost and emissions. This case study asks teams to design a solar-powered dewatering system for mining operations. The design must estimate the volume and head of water to be pumped, size the pumps, solar array and any energy storage, and handle variable inflow during rain, dust deposition on panels and the harsh mining environment. Teams should consider hybrid operation with the grid or generators for reliability, safe installation in mining areas and ways to reduce pumping energy. A strong proposal includes hydraulic and electrical calculations, a system layout, the control strategy, an economic comparison with diesel or grid pumping and a plan for maintenance and safety."
   },
   {
-    "id": "CE-01",
-    "code": "CE-01",
+    "id": "CV-01",
+    "code": "CV-01",
     "sihNo": "SIH25065",
     "domain": "Mechanical and Civil",
     "category": "Software",
@@ -320,8 +320,8 @@ const INITIAL_PROBLEM_STATEMENTS = [
     "description": "Rooftop rainwater harvesting and artificial recharge can significantly improve groundwater levels in cities and villages, but property owners, engineers and officials often lack a quick, reliable way to judge how much water a particular site can harvest and what size of storage or recharge structure is appropriate. This case study asks teams to design an application that performs an on-spot assessment of rooftop rainwater harvesting and artificial recharge potential and recommends the size and type of structure. The app would need to use rooftop area and surface, local rainfall data, soil and groundwater conditions and space available, and then apply sound hydrological and civil engineering calculations. A strong solution explains the inputs and data sources, the calculation method, the recommended structure designs, the user interface for field officers and citizens and the way estimated benefits are presented."
   },
   {
-    "id": "CE-02",
-    "code": "CE-02",
+    "id": "CV-02",
+    "code": "CV-02",
     "sihNo": "SIH25090",
     "domain": "Mechanical and Civil",
     "category": "Hardware",
@@ -329,5 +329,27 @@ const INITIAL_PROBLEM_STATEMENTS = [
     "org": "Government of Kerala",
     "theme": "Clean & Green Technology",
     "description": "Households, hostels and institutions produce large volumes of grey water from kitchens, bathrooms and laundry, which is usually discharged directly into drains or the soil, wasting a resource that could be reused for gardening, flushing and other non-potable purposes, while also stressing sewage systems and natural wetlands. This case study asks teams to design practical systems for grey water management and reuse, supported by wetland management and water conservation measures. Teams should study the quality and quantity of grey water, propose treatment methods suitable for small and medium scale such as filtration, constructed wetlands and settling units, and design storage and distribution for reuse. Cost, land requirement, odour, maintenance and public acceptance are important constraints. A strong proposal includes design calculations, a layout, expected water savings, monitoring of treated water quality and a plan for operation and maintenance."
+  },
+  {
+    "id": "CV-03",
+    "code": "CV-03",
+    "sihNo": "SIH25098",
+    "domain": "Mechanical and Civil",
+    "category": "Software",
+    "title": "Design of a 4-Storey Commercial Office Building using Revit Architecture and Revit Structure (BIM)",
+    "org": "Autodesk",
+    "theme": "Smart Education",
+    "description": "Building design today is a team effort between architects and structural engineers, and many errors, clashes and cost overruns come from architectural and structural drawings being prepared separately and reconciled late. Building Information Modelling (BIM) tackles this by keeping both disciplines in one coordinated digital model. This case study asks teams to design a four-storey commercial office building using Revit Architecture and Revit Structure, with effective integration between the architectural and structural models. Teams may assume the plot size and any dimensions that are needed (in millimetres), so the focus is on design quality and coordination, not on a fixed site. A strong submission presents a sensible space plan for offices, circulation, stairs, lifts and services, a structural system with columns, beams, slabs and foundations, a clash-free coordinated model, and views, schedules and sections generated from the model. Teams should justify their choices with basic load and code considerations, explain how the model reduces rework, and describe how the same model could support quantity estimation and construction planning."
+  },
+  {
+    "id": "CV-04",
+    "code": "CV-04",
+    "sihNo": "SIH25085",
+    "domain": "Mechanical and Civil",
+    "category": "Hardware",
+    "title": "Solution for Non-Revenue Loss in Water Supply, Improving Awareness of Water Conservation, and Treatment and Reuse of Waste Water for Domestic Purposes",
+    "org": "Government of Kerala",
+    "theme": "Miscellaneous",
+    "description": "A large share of the water that utilities treat and pump never reaches a paying consumer. It is lost through leaking pipes, faulty or tampered meters, illegal connections and overflows, and this non-revenue water raises costs, wastes energy and reduces supply for everyone. At the same time, treated waste water is rarely reused, and many households do not realise how much water they could save. This case study asks teams to develop a practical solution that reduces non-revenue loss in a water supply network and also promotes conservation and the treatment and reuse of waste water for domestic, non-drinking purposes. Teams should show how leaks and unmetered use can be detected, for example through flow and pressure monitoring in zones, smart metering or acoustic sensing, and how the findings translate into repair priorities. They should also propose a small-scale waste water treatment and reuse arrangement suitable for households or housing colleges, with an awareness component that actually changes usage behaviour. A strong proposal includes a network or zone-level approach, sensing and monitoring design, treatment design with sizing, an estimate of water and money saved, and a maintenance plan."
   }
 ];

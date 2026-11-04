@@ -108,8 +108,8 @@ Connected directly with **Google Sheets** via **Google Apps Script**, featuring 
 | :--- | :---: | :--- | :--- |
 | **CSE / AIML** | 15 | `CS-01` to `CS-15` | 15 Software |
 | **Electronics & Comm (ECE)** | 10 | `EC-01` to `EC-10` | 10 Hardware |
-| **Mechanical & Civil (ME/CE)** | 5 | `ME-01` to `ME-03`, `CE-01` to `CE-02` | 1 Software, 4 Hardware |
-| **Total** | **30** | Official SIH 2025 PS Numbers | **16 Software / 14 Hardware** |
+| **Mechanical & Civil (ME/CV)** | 7 | `ME-01` to `ME-03`, `CV-01` to `CV-04` | 2 Software, 5 Hardware |
+| **Total** | **32** | Official SIH 2025 PS Numbers | **17 Software / 15 Hardware** |
 
 ---
 
