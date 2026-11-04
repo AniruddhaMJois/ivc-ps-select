@@ -1,6 +1,6 @@
 /**
  * =========================================================================
- * IDEATHON 2025 - VVCE MYSURU
+ * VICE VERSE 2026 - VVCE MYSURU
  * 2 TEAMS PER PROBLEM STATEMENT SELECTOR
  * Columns: Team Name | Problem Statement
  * =========================================================================

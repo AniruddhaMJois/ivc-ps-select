@@ -1,6 +1,6 @@
-# VVCE Ideathon 2025 - Problem Statement Selection Portal
+# VICE VERSE 2026 - Problem Statement Selection Portal
 
-A modern, real-time web portal for student teams to explore and claim official **Smart India Hackathon (SIH) 2025** Problem Statements for the **Ideathon - VVCE, Mysuru**.
+A modern, real-time web portal for student teams to explore and claim official **Smart India Hackathon (SIH) 2025** Problem Statements for **VICE VERSE 2026 - VVCE, Mysuru**.
 
 Connected directly with **Google Sheets** via **Google Apps Script**, featuring **atomic concurrency locking** so that **only one team can select each problem statement**, with live status synchronization across all devices.
 
