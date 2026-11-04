@@ -4,9 +4,10 @@
  */
 
 // Application State
+const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2lVoTD8_XBDZ2UH1wfeD6RDCdbF7cnTIKQIpUJTmNLjKAuv25yXKNYYPRjC2N2FWmjA/exec';
 let problemStatements = [];
 let currentDomainFilter = 'ALL';
-let appsScriptUrl = localStorage.getItem('ivc_apps_script_url') || '';
+let appsScriptUrl = localStorage.getItem('ivc_apps_script_url') || DEFAULT_APPS_SCRIPT_URL;
 let userClaimedPS = null;
 let pollInterval = null;
 let lastSyncTimestamp = Date.now();

@@ -126,12 +126,16 @@ function setupSheet() {
   logSheet.setFrozenRows(1);
   logSheet.autoResizeColumns(1, logHeaders.length);
   
-  SpreadsheetApp.getUi().alert(
-    "Setup Completed Successfully!",
-    "Initialized 30 Problem Statements across CSE/AIML (15), ECE (10), and Mech/Civil (5).\n\n" +
-    "You can now deploy this script as a Web App: Deploy > New deployment > Web App > Who has access: Anyone.",
-    SpreadsheetApp.getUi().ButtonSet.OK
-  );
+  try {
+    SpreadsheetApp.getUi().alert(
+      "Setup Completed Successfully!",
+      "Initialized 30 Problem Statements across CSE/AIML (15), ECE (10), and Mech/Civil (5).\n\n" +
+      "You can now deploy this script as a Web App: Deploy > New deployment > Web App > Who has access: Anyone.",
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
+  } catch (uiErr) {
+    Logger.log("Setup completed headlessly: " + uiErr.toString());
+  }
 }
 
 /**
@@ -241,14 +245,10 @@ function handleClaim(data) {
   
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName(SHEET_NAME_PS);
-    if (!sheet) {
-      return createJsonResponse({ success: false, message: "Sheet not initialized. Please run setupSheet() first." });
-    }
-    
-    const lastRow = sheet.getLastRow();
-    if (lastRow < 2) {
-      return createJsonResponse({ success: false, message: "No problem statements found in sheet." });
+    let sheet = ss.getSheetByName(SHEET_NAME_PS);
+    if (!sheet || sheet.getLastRow() < 2) {
+      setupSheet();
+      sheet = ss.getSheetByName(SHEET_NAME_PS);
     }
     
     const dataRange = sheet.getRange(2, 1, lastRow - 1, 14);
@@ -341,18 +341,11 @@ function handleClaim(data) {
 function fetchAllProblemStatements() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName(SHEET_NAME_PS);
+    let sheet = ss.getSheetByName(SHEET_NAME_PS);
     
-    if (!sheet) {
-      return createJsonResponse({
-        success: false,
-        message: "Sheet not configured. Please run setupSheet() first."
-      });
-    }
-    
-    const lastRow = sheet.getLastRow();
-    if (lastRow < 2) {
-      return createJsonResponse({ success: true, stats: { total: 0, available: 0, claimed: 0 }, data: [] });
+    if (!sheet || sheet.getLastRow() < 2) {
+      setupSheet();
+      sheet = ss.getSheetByName(SHEET_NAME_PS);
     }
     
     const values = sheet.getRange(2, 1, lastRow - 1, 14).getValues();
