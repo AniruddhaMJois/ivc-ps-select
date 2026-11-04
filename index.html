@@ -33,7 +33,7 @@
     <!-- Step 1: Team Name Input Card -->
     <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-xl max-w-xl mx-auto">
       <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 text-center">
-        1. Enter Your Team Name <span class="text-red-400">*</span>
+        Enter Your Team Name <span class="text-red-400">*</span>
       </label>
       <input type="text" id="teamNameInput" placeholder="e.g., Team Innovators" 
         class="w-full bg-slate-950 border-2 border-slate-600 focus:border-blue-500 rounded-xl px-4 py-3 text-base text-white text-center font-bold tracking-wide outline-none transition placeholder-slate-500">
@@ -98,7 +98,7 @@
     <div id="toastInner" class="px-4 py-3 rounded-xl shadow-2xl text-xs font-bold border"></div>
   </div>
 
-  <!-- Embedded Data fallback -->
+  <!-- Embedded Data -->
   <script src="data.js"></script>
 
   <script>
@@ -109,7 +109,6 @@
     let currentFilter = "ALL";
     let myClaimedPS = localStorage.getItem("ivc_my_claimed_ps") || null;
 
-    // Load initial data
     document.addEventListener("DOMContentLoaded", () => {
       // Load saved team name
       const savedTeam = localStorage.getItem("ivc_my_team_name");
@@ -133,33 +132,46 @@
         renderTable();
       }
 
-      // Fetch from Google Sheets & start polling every 4 seconds
+      // Fetch live claims from Google Sheets & poll every 3 seconds
       fetchLiveSheetData();
-      setInterval(fetchLiveSheetData, 4000);
+      setInterval(fetchLiveSheetData, 3000);
     });
 
-    // Fetch live rows from Google Sheets
+    // Fetch live claims from Google Sheets
     async function fetchLiveSheetData() {
       try {
-        const res = await fetch(`${API_URL}?action=getPS&_t=${Date.now()}`);
+        const res = await fetch(`${API_URL}?action=getClaims&_t=${Date.now()}`);
         const json = await res.json();
-        if (json && json.success && Array.isArray(json.data)) {
-          // Merge status
-          const map = new Map();
-          json.data.forEach(item => map.set(item.code.toUpperCase(), item));
-
-          problemStatements.forEach(ps => {
-            const live = map.get(ps.code.toUpperCase());
-            if (live) {
-              ps.status = live.status || (live.teamName ? "Taken" : "Available");
-              ps.teamName = live.teamName || "";
-            }
-          });
-
-          renderTable();
-          document.getElementById("syncDot").className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-          document.getElementById("syncText").textContent = "Connected & Synced";
+        
+        let claims = [];
+        if (json && Array.isArray(json.claimed)) {
+          claims = json.claimed;
+        } else if (json && Array.isArray(json.data)) {
+          claims = json.data.filter(d => d.teamName).map(d => ({ psCode: d.code, teamName: d.teamName }));
         }
+
+        const map = new Map();
+        claims.forEach(item => {
+          if (item.psCode) {
+            map.set(item.psCode.toUpperCase(), item.teamName);
+          }
+        });
+
+        problemStatements.forEach(ps => {
+          const takenBy = map.get(ps.code.toUpperCase());
+          if (takenBy) {
+            ps.status = "Taken";
+            ps.teamName = takenBy;
+          } else {
+            ps.status = "Available";
+            ps.teamName = "";
+          }
+        });
+
+        renderTable();
+        document.getElementById("syncDot").className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        document.getElementById("syncText").textContent = "Connected & Synced";
+
       } catch (err) {
         document.getElementById("syncDot").className = "w-2.5 h-2.5 rounded-full bg-amber-400";
         document.getElementById("syncText").textContent = "Connecting to Sheets...";
@@ -206,8 +218,8 @@
 
         // Row background
         let rowClass = "hover:bg-slate-700/40 transition";
-        if (isTaken) rowClass = "bg-slate-900/40 opacity-70";
-        if (isMyTeam) rowClass = "bg-emerald-950/30 border border-emerald-500/40";
+        if (isTaken) rowClass = "bg-slate-900/50 opacity-60";
+        if (isMyTeam) rowClass = "bg-emerald-950/30 border border-emerald-500/40 opacity-100";
 
         // Domain badge color
         let domainColor = "text-blue-400 bg-blue-500/10 border-blue-500/20";
@@ -253,10 +265,10 @@
               `}
             </td>
 
-            <!-- Action Button (Unclickable if Taken) -->
+            <!-- Action Button (UNCLICKABLE when Taken) -->
             <td class="p-3 text-center whitespace-nowrap">
               ${isTaken ? `
-                <button disabled class="w-full py-1.5 px-3 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs cursor-not-allowed pointer-events-none opacity-50">
+                <button disabled aria-disabled="true" class="w-full py-1.5 px-3 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs cursor-not-allowed pointer-events-none select-none">
                   🔒 Taken
                 </button>
               ` : `
@@ -284,17 +296,16 @@
       }
 
       if (myClaimedPS) {
-        showToast(`Your team already selected PS ${myClaimedPS}!`, "error");
+        showToast(`Your team already selected PS [${myClaimedPS}]!`, "error");
         return;
       }
 
       const confirmed = confirm(`Are you sure you want to select ${psCode} for team "${teamName}"?\nThis will lock it in Google Sheets.`);
       if (!confirmed) return;
 
-      showToast(`Locking ${psCode} for Team "${teamName}"...`, "info");
+      showToast(`Saving to Google Sheets...`, "info");
 
       try {
-        // Send to Google Sheet
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -307,7 +318,7 @@
           localStorage.setItem("ivc_my_claimed_ps", psCode);
           localStorage.setItem("ivc_my_team_name", teamName);
 
-          showToast(`SUCCESS! Problem Statement ${psCode} is locked for "${teamName}"!`, "success");
+          showToast(`SUCCESS! Problem Statement ${psCode} locked for "${teamName}"!`, "success");
           lockUIForClaimed(psCode, teamName);
           fetchLiveSheetData();
         } else {
@@ -340,7 +351,7 @@
       if (input) input.disabled = true;
       const notice = document.getElementById("selectionNotice");
       if (notice) {
-        notice.innerHTML = `<span class="text-emerald-400 font-bold">✓ Team "${teamName}" locked PS [${psCode}].</span>`;
+        notice.innerHTML = `<span class="text-emerald-400 font-bold">✓ Team "${teamName}" selected PS [${psCode}].</span>`;
       }
     }
 
