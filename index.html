@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ideathon 2025 - Problem Statement Selection Portal | VVCE</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .glow-effect {
+      box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.3);
+    }
+    .pulse-dot {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-blue-600 selection:text-white flex flex-col">
+
+  <!-- Top Announcement Bar -->
+  <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-xs sm:text-sm py-2 px-4 text-center font-medium shadow-md flex items-center justify-center gap-2">
+    <span class="inline-block px-2 py-0.5 bg-white/20 rounded-full font-bold text-white text-xs">OFFICIAL</span>
+    <span>Smart India Hackathon (SIH) 2025 Case Studies &bull; <strong>1 Team = 1 Problem Statement (Strict Locking)</strong></span>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-3">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20 text-lg">
+            IVC
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="font-extrabold text-base sm:text-lg tracking-tight text-white">Ideathon 2025</h1>
+              <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">VVCE, Mysuru</span>
+            </div>
+            <p class="text-xs text-slate-400">Problem Statement Selection & Real-Time Sync Portal</p>
+          </div>
+        </div>
+
+        <!-- Mobile Quick Status -->
+        <div class="md:hidden flex items-center gap-2">
+          <button id="configBtnMobile" class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Sync Status & Metrics -->
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end flex-wrap">
+        
+        <!-- Live Status Pill -->
+        <div id="syncBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-medium cursor-pointer hover:border-slate-600 transition" onclick="openConfigModal()">
+          <span id="syncDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 pulse-dot"></span>
+          <span id="syncStatusText" class="text-slate-300">Live Syncing</span>
+          <span id="lastSyncTimer" class="text-[10px] text-slate-500 ml-1">0s ago</span>
+        </div>
+
+        <!-- Counter Badges -->
+        <div class="flex items-center gap-1.5 text-xs">
+          <span class="px-2.5 py-1 rounded-md bg-emerald-950/70 text-emerald-300 border border-emerald-800/50 font-semibold flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span id="statAvailable">30</span> Available
+          </span>
+          <span class="px-2.5 py-1 rounded-md bg-rose-950/70 text-rose-300 border border-rose-800/50 font-semibold flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+            <span id="statClaimed">0</span> Claimed
+          </span>
+        </div>
+
+        <!-- Google Sheet Link & Settings -->
+        <div class="hidden md:flex items-center gap-2">
+          <button onclick="refreshData(true)" class="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition" title="Refresh Now">
+            <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
+          </button>
+          <button onclick="openConfigModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 text-xs font-medium transition">
+            <i data-lucide="sheet" class="w-4 h-4 text-emerald-400"></i>
+            <span>Google Sheets Setup</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+
+    <!-- Active Selection Banner (If team already claimed one in this session) -->
+    <div id="activeClaimBanner" class="hidden p-4 rounded-xl bg-gradient-to-r from-emerald-900/60 via-slate-900 to-slate-900 border border-emerald-600/50 shadow-lg">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="check-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Confirmed Selection for Your Team</div>
+            <div class="font-bold text-white text-base" id="claimedBannerTitle">Loading...</div>
+            <div class="text-xs text-slate-300 flex items-center gap-2 mt-0.5" id="claimedBannerSubtitle">
+              Team: <strong id="claimedBannerTeam" class="text-emerald-300"></strong> | Locked at <span id="claimedBannerTime"></span>
+            </div>
+          </div>
+        </div>
+        <button onclick="showClaimReceiptModal()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition flex items-center gap-1.5">
+          <i data-lucide="ticket" class="w-4 h-4"></i>
+          <span>View Team Receipt</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 1: Team Information Card -->
+    <section class="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 shadow-xl relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
+      
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4 mb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-xs">1</span>
+            <h2 class="text-lg font-bold text-white tracking-tight">Team Identification</h2>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">Enter your team details before selecting a Problem Statement. Each team can claim strictly ONE PS.</p>
+        </div>
+
+        <div id="teamLockedNotice" class="hidden text-xs px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/30 font-medium flex items-center gap-1.5">
+          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+          <span>Team info locked for active selection</span>
+        </div>
+      </div>
+
+      <!-- Input Form Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="teamFormFields">
+        
+        <!-- Team Name (Required) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+            Team Name <span class="text-rose-400">*</span>
+          </label>
+          <div class="relative">
+            <input type="text" id="inputTeamName" placeholder="e.g., Code Crusaders" 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-medium">
+            <i data-lucide="users" class="w-4 h-4 text-slate-500 absolute right-3.5 top-3"></i>
+          </div>
+        </div>
+
+        <!-- Department / Branch -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+            Department / Branch <span class="text-rose-400">*</span>
+          </label>
+          <select id="inputDepartment" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-medium">
+            <option value="CSE">Computer Science & Engg (CSE)</option>
+            <option value="AIML">AI & Machine Learning (AIML)</option>
+            <option value="ISE">Information Science & Engg (ISE)</option>
+            <option value="ECE">Electronics & Communication (ECE)</option>
+            <option value="ME">Mechanical Engineering (ME)</option>
+            <option value="CV">Civil Engineering (CV)</option>
+            <option value="EEE">Electrical & Electronics (EEE)</option>
+            <option value="OTHER">Other / Interdisciplinary</option>
+          </select>
+        </div>
+
+        <!-- Team Leader Name -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+            Team Leader Name <span class="text-rose-400">*</span>
+          </label>
+          <div class="relative">
+            <input type="text" id="inputLeaderName" placeholder="Full name of Team Lead" 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+            <i data-lucide="user-check" class="w-4 h-4 text-slate-500 absolute right-3.5 top-3"></i>
+          </div>
+        </div>
+
+        <!-- Contact Number -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+            Leader Contact / WhatsApp <span class="text-rose-400">*</span>
+          </label>
+          <div class="relative">
+            <input type="tel" id="inputLeaderContact" placeholder="10-digit mobile number" 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono">
+            <i data-lucide="phone" class="w-4 h-4 text-slate-500 absolute right-3.5 top-3"></i>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Step 2: Problem Statement Explorer ("NOT a simple dropdown") -->
+    <section class="space-y-4">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/90 rounded-2xl border border-slate-800 p-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">2</span>
+            <h2 class="text-lg font-bold text-white tracking-tight">Select Problem Statement</h2>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">Explore by Domain, Department, or Theme. Live status updates every 4 seconds.</p>
+        </div>
+
+        <!-- Custom Dropdown Selector (Rich Combobox alternative) -->
+        <div class="relative w-full sm:w-80">
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Quick Dropdown Navigation</label>
+          <button id="customDropdownTrigger" onclick="toggleCustomDropdown()" 
+            class="w-full bg-slate-950 border border-slate-700 hover:border-blue-500 rounded-xl px-3 py-2 text-xs text-left text-slate-300 flex items-center justify-between transition shadow-sm">
+            <span id="customDropdownLabel" class="truncate font-medium">Browse All 30 PS...</span>
+            <i data-lucide="chevron-down" id="customDropdownArrow" class="w-4 h-4 text-slate-400 ml-2 flex-shrink-0 transition-transform"></i>
+          </button>
+
+          <!-- Dropdown Popup Panel -->
+          <div id="customDropdownMenu" class="hidden absolute right-0 top-full mt-1.5 w-full sm:w-96 max-h-96 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col">
+            <div class="p-2 border-b border-slate-800 bg-slate-950">
+              <input type="text" id="dropdownSearchInput" placeholder="Filter dropdown items..." 
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-sans"
+                oninput="filterDropdownList(this.value)">
+            </div>
+            <div id="dropdownItemsContainer" class="overflow-y-auto divide-y divide-slate-800/60 max-h-72 text-xs">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Filter Controls Bar -->
+      <div class="bg-slate-900/70 backdrop-blur rounded-2xl border border-slate-800 p-4 space-y-3">
+        
+        <!-- Domain Tabs -->
+        <div>
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-400"></i>
+            <span>Filter by Domain / Department</span>
+          </div>
+          <div class="flex flex-wrap gap-2" id="domainFilterTabs">
+            <button onclick="setDomainFilter('ALL')" data-filter="ALL" class="domain-tab active px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-blue-600 text-white shadow-md shadow-blue-500/20">
+              <span>All Domains</span>
+              <span class="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px]" id="countDomainAll">30</span>
+            </button>
+            <button onclick="setDomainFilter('CSE / AIML')" data-filter="CSE / AIML" class="domain-tab px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition flex items-center gap-1.5">
+              <span>💻 CSE / AIML</span>
+              <span class="px-1.5 py-0.5 rounded-full bg-slate-700 text-[10px]" id="countDomainCSE">15</span>
+            </button>
+            <button onclick="setDomainFilter('Electronics and Communication')" data-filter="Electronics and Communication" class="domain-tab px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition flex items-center gap-1.5">
+              <span>📡 Electronics & Comm</span>
+              <span class="px-1.5 py-0.5 rounded-full bg-slate-700 text-[10px]" id="countDomainECE">10</span>
+            </button>
+            <button onclick="setDomainFilter('Mechanical and Civil')" data-filter="Mechanical and Civil" class="domain-tab px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition flex items-center gap-1.5">
+              <span>⚙️ Mechanical & Civil</span>
+              <span class="px-1.5 py-0.5 rounded-full bg-slate-700 text-[10px]" id="countDomainMechCiv">5</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Secondary Filters & Search Bar -->
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-2 border-t border-slate-800">
+          
+          <!-- Category and Status Filter Chips -->
+          <div class="flex flex-wrap items-center gap-2">
+            
+            <!-- Category Filter -->
+            <select id="categorySelect" onchange="renderProblemStatements()" 
+              class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500 font-medium">
+              <option value="ALL">All Categories (Software & Hardware)</option>
+              <option value="Software">Software Only (💻)</option>
+              <option value="Hardware">Hardware Only (⚙️)</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select id="statusSelect" onchange="renderProblemStatements()" 
+              class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500 font-medium">
+              <option value="ALL">All Status (Available & Claimed)</option>
+              <option value="Available">Available Only (🟢)</option>
+              <option value="Claimed">Claimed Only (🔒)</option>
+            </select>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative flex-1 max-w-md">
+            <input type="text" id="searchInput" placeholder="Search by PS Code (e.g. CS-01), SIH ID, Title, Ministry..." 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+              oninput="renderProblemStatements()">
+            <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-2.5"></i>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Problem Statement Cards Grid -->
+      <div id="psGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden text-center py-12 bg-slate-900/50 rounded-2xl border border-slate-800">
+        <i data-lucide="filter-x" class="w-10 h-10 text-slate-600 mx-auto mb-2"></i>
+        <h3 class="text-sm font-bold text-slate-300">No Problem Statements match your criteria</h3>
+        <p class="text-xs text-slate-500 mt-1">Try clearing your search term or switching domain tabs.</p>
+        <button onclick="resetFilters()" class="mt-3 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold">
+          Reset All Filters
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modal: PS Detailed View & Guidelines -->
+  <div id="detailModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-800 flex items-start justify-between gap-3 bg-slate-950">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span id="modalPsCode" class="px-2.5 py-0.5 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono font-bold text-xs"></span>
+            <span id="modalSihNo" class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono text-[11px]"></span>
+            <span id="modalCategoryBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded"></span>
+          </div>
+          <h3 id="modalTitle" class="text-base font-bold text-white leading-snug"></h3>
+        </div>
+        <button onclick="closeDetailModal()" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 overflow-y-auto space-y-4 text-xs sm:text-sm">
+        
+        <!-- Metadata Pill Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
+            <span class="text-slate-500 block text-[10px] uppercase font-bold">Domain & Department</span>
+            <span id="modalDomain" class="font-semibold text-slate-200"></span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
+            <span class="text-slate-500 block text-[10px] uppercase font-bold">Theme / Sector</span>
+            <span id="modalTheme" class="font-semibold text-slate-200"></span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 sm:col-span-2">
+            <span class="text-slate-500 block text-[10px] uppercase font-bold">Ministry / Organization</span>
+            <span id="modalOrg" class="font-semibold text-slate-200"></span>
+          </div>
+        </div>
+
+        <!-- Full Description & Case Study Guidance -->
+        <div>
+          <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            <span>Case Study Background & Guidance</span>
+          </h4>
+          <p id="modalDescription" class="text-slate-300 leading-relaxed bg-slate-950/40 p-3.5 rounded-xl border border-slate-800/80 whitespace-pre-line text-xs sm:text-[13px]"></p>
+        </div>
+
+        <!-- Evaluation Rubric / Guidelines from Booklet -->
+        <div class="bg-blue-950/20 border border-blue-900/40 p-3 rounded-xl text-xs text-blue-200 space-y-1">
+          <div class="font-bold flex items-center gap-1.5 text-blue-300">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            <span>Ideathon Presentation Guidelines (From Booklet)</span>
+          </div>
+          <ul class="list-disc list-inside text-[11px] text-slate-300 space-y-0.5 pl-1">
+            <li>Teams should present: Problem understanding, solution approach, tech design, impact, cost, and sustainability.</li>
+            <li>Suggested format: <strong>7-minute pitch followed by 3 minutes of jury Q&A</strong>.</li>
+            <li>Official SIH portal reference can be accessed via the SIH PS number.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3">
+        <button onclick="closeDetailModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+          Close
+        </button>
+        <button id="modalSelectBtn" onclick="confirmSelectFromModal()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-500/20 transition flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Select this PS for Team</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal: Confirmation Prompt -->
+  <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      
+      <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
+        <i data-lucide="help-circle" class="w-6 h-6"></i>
+      </div>
+
+      <div class="text-center">
+        <h3 class="text-lg font-bold text-white">Confirm Problem Selection</h3>
+        <p class="text-xs text-slate-400 mt-1">Please double-check your selection. <strong>This action is final and locks the PS in Google Sheets in real-time.</strong></p>
+      </div>
+
+      <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 space-y-2 text-xs">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Team Name:</span>
+          <span id="confirmTeam" class="font-bold text-white"></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Department:</span>
+          <span id="confirmDept" class="font-medium text-slate-300"></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Problem Statement:</span>
+          <span id="confirmPsCode" class="font-mono font-bold text-blue-400"></span>
+        </div>
+        <div class="border-t border-slate-800 pt-1.5">
+          <span class="text-slate-500 block mb-0.5">Title:</span>
+          <span id="confirmPsTitle" class="font-semibold text-slate-200 block text-[11px] leading-tight"></span>
+        </div>
+      </div>
+
+      <div class="flex gap-2.5 pt-2">
+        <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+          Cancel
+        </button>
+        <button id="finalSubmitBtn" onclick="executeClaim()" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-500/25 transition flex items-center justify-center gap-1.5">
+          <span id="btnText">Confirm & Lock PS</span>
+          <i data-lucide="loader-2" id="btnSpinner" class="hidden w-4 h-4 animate-spin"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal: Selection Success Receipt -->
+  <div id="receiptModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-emerald-600/40 rounded-3xl max-w-md w-full p-6 shadow-2xl text-center space-y-4 relative overflow-hidden">
+      
+      <div class="absolute -top-12 -right-12 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl"></div>
+      
+      <div class="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+        <i data-lucide="check" class="w-7 h-7"></i>
+      </div>
+
+      <div>
+        <h3 class="text-xl font-black text-white">Problem Statement Locked!</h3>
+        <p class="text-xs text-emerald-400 font-medium mt-1">Successfully synced with Google Sheets in real-time.</p>
+      </div>
+
+      <!-- Ticket Receipt Card -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-left space-y-2.5 text-xs font-mono">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+          <span class="text-slate-500 text-[10px]">EVENT:</span>
+          <span class="text-slate-300 font-sans font-bold">VVCE IDEATHON 2025</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">TEAM:</span>
+          <span id="receiptTeamName" class="font-bold text-white font-sans"></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">DEPT:</span>
+          <span id="receiptDept" class="text-slate-300"></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">LEADER:</span>
+          <span id="receiptLeader" class="text-slate-300"></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">PS CODE:</span>
+          <span id="receiptPsCode" class="text-emerald-400 font-bold text-sm"></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">SIH REF:</span>
+          <span id="receiptSihNo" class="text-slate-300"></span>
+        </div>
+        <div class="pt-2 border-t border-slate-800 text-[11px] font-sans text-slate-300" id="receiptTitle">
+        </div>
+        <div class="pt-1 text-[10px] text-slate-500 flex justify-between">
+          <span>TIMESTAMP:</span>
+          <span id="receiptTimestamp"></span>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="window.print()" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Print Slip</span>
+        </button>
+        <button onclick="closeReceiptModal()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
+          Done
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal: Google Sheets Connection Settings -->
+  <div id="configModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sheet" class="w-5 h-5 text-emerald-400"></i>
+          <h3 class="font-bold text-white text-base">Google Sheets & Apps Script Setup</h3>
+        </div>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-300 space-y-2">
+        <p>This portal connects to your Google Sheet via the deployed <strong>Google Apps Script Web App</strong>.</p>
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+          <span class="font-bold text-slate-200 block text-[11px] uppercase text-emerald-400">Quick 3-Step Setup:</span>
+          <ol class="list-decimal list-inside space-y-1 text-slate-400 text-[11px]">
+            <li>Open your Google Sheet &gt; Click <strong>Extensions &gt; Apps Script</strong>.</li>
+            <li>Paste the contents of <code class="text-blue-400 font-mono">Code.gs</code> and run <code class="text-emerald-400 font-mono">setupSheet()</code> once.</li>
+            <li>Click <strong>Deploy &gt; New deployment &gt; Web app</strong> (set <em>Who has access</em> to <strong>Anyone</strong>), copy the Web App URL, and paste below:</li>
+          </ol>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">
+          Google Apps Script Web App URL
+        </label>
+        <input type="url" id="configApiUrl" placeholder="https://script.google.com/macros/s/.../exec" 
+          class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 font-mono">
+      </div>
+
+      <div class="flex items-center justify-between gap-3 pt-2">
+        <button onclick="testConnection()" id="testConnBtn" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
+          <i data-lucide="wifi" class="w-3.5 h-3.5"></i>
+          <span>Test Connection</span>
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closeConfigModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+            Cancel
+          </button>
+          <button onclick="saveConfigApiUrl()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20">
+            Save & Connect
+          </button>
+        </div>
+      </div>
+
+      <div id="testConnResult" class="text-xs p-2.5 rounded-lg hidden"></div>
+
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 max-w-sm w-full">
+    <div id="toastInner" class="p-3.5 rounded-xl shadow-2xl border text-xs flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <i id="toastIcon" data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i>
+        <span id="toastMsg" class="font-medium"></span>
+      </div>
+      <button onclick="hideToast()" class="text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-5 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>
+        <strong class="text-slate-400">Ideathon 2025</strong> &bull; Vidyavardhaka College of Engineering (VVCE), Mysuru
+      </div>
+      <div class="flex items-center gap-4 text-[11px]">
+        <span>Strict Real-Time Concurrency Lock</span>
+        <span>&bull;</span>
+        <a href="https://sih.gov.in/sih2025PS" target="_blank" class="text-blue-400 hover:underline">Official SIH Portal</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Embedded All 30 Problem Statements Data (Default Fallback & Instant Offline Loading) -->
+  <script src="data.js"></script>
+  <!-- Main Application Logic -->
+  <script src="app.js"></script>
+
+</body>
+</html>
