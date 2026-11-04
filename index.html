@@ -164,81 +164,24 @@
       </div>
     </div>
 
-    <!-- Step 1: Team Information Card -->
-    <section class="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 shadow-xl relative overflow-hidden">
+    <!-- Step 1: Team Name Input (Simple & Fast) -->
+    <section class="bg-slate-900/90 rounded-2xl border border-slate-800 p-6 shadow-xl relative overflow-hidden max-w-xl mx-auto">
       <div class="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
       
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4 mb-4">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-xs">1</span>
-            <h2 class="text-lg font-bold text-white tracking-tight">Team Identification</h2>
-          </div>
-          <p class="text-xs text-slate-400 mt-1">Enter your team details before selecting a Problem Statement. Each team can claim strictly ONE PS.</p>
-        </div>
-
-        <div id="teamLockedNotice" class="hidden text-xs px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/30 font-medium flex items-center gap-1.5">
-          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-          <span>Team info locked for active selection</span>
-        </div>
+      <div class="text-center mb-4">
+        <span class="inline-block px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-xs font-bold mb-2">STEP 1</span>
+        <h2 class="text-xl font-extrabold text-white tracking-tight">Enter Your Team Name</h2>
+        <p class="text-xs text-slate-400 mt-1">Each team can choose strictly ONE Problem Statement.</p>
       </div>
 
-      <!-- Input Form Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="teamFormFields">
-        
-        <!-- Team Name (Required) -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-            Team Name <span class="text-rose-400">*</span>
-          </label>
-          <div class="relative">
-            <input type="text" id="inputTeamName" placeholder="e.g., Code Crusaders" 
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-medium">
-            <i data-lucide="users" class="w-4 h-4 text-slate-500 absolute right-3.5 top-3"></i>
-          </div>
-        </div>
+      <div class="relative">
+        <input type="text" id="inputTeamName" placeholder="Type your Team Name here..." 
+          class="w-full bg-slate-950 border-2 border-slate-700 hover:border-blue-500 focus:border-blue-500 rounded-xl px-4 py-3 text-base text-white placeholder-slate-500 text-center font-bold tracking-wide outline-none transition shadow-inner">
+      </div>
 
-        <!-- Department / Branch -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-            Department / Branch <span class="text-rose-400">*</span>
-          </label>
-          <select id="inputDepartment" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-medium">
-            <option value="CSE">Computer Science & Engg (CSE)</option>
-            <option value="AIML">AI & Machine Learning (AIML)</option>
-            <option value="ISE">Information Science & Engg (ISE)</option>
-            <option value="ECE">Electronics & Communication (ECE)</option>
-            <option value="ME">Mechanical Engineering (ME)</option>
-            <option value="CV">Civil Engineering (CV)</option>
-            <option value="EEE">Electrical & Electronics (EEE)</option>
-            <option value="OTHER">Other / Interdisciplinary</option>
-          </select>
-        </div>
-
-        <!-- Team Leader Name -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-            Team Leader Name <span class="text-rose-400">*</span>
-          </label>
-          <div class="relative">
-            <input type="text" id="inputLeaderName" placeholder="Full name of Team Lead" 
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
-            <i data-lucide="user-check" class="w-4 h-4 text-slate-500 absolute right-3.5 top-3"></i>
-          </div>
-        </div>
-
-        <!-- Contact Number -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-            Leader Contact / WhatsApp <span class="text-rose-400">*</span>
-          </label>
-          <div class="relative">
-            <input type="tel" id="inputLeaderContact" placeholder="10-digit mobile number" 
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono">
-            <i data-lucide="phone" class="w-4 h-4 text-slate-500 absolute right-3.5 top-3"></i>
-          </div>
-        </div>
-
+      <div id="teamLockedNotice" class="hidden text-xs mt-3 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-medium text-center flex items-center justify-center gap-1.5">
+        <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+        <span>Team name locked for this selection</span>
       </div>
     </section>
 
@@ -457,10 +400,6 @@
           <span id="confirmTeam" class="font-bold text-white"></span>
         </div>
         <div class="flex justify-between">
-          <span class="text-slate-500">Department:</span>
-          <span id="confirmDept" class="font-medium text-slate-300"></span>
-        </div>
-        <div class="flex justify-between">
           <span class="text-slate-500">Problem Statement:</span>
           <span id="confirmPsCode" class="font-mono font-bold text-blue-400"></span>
         </div>
@@ -507,14 +446,6 @@
         <div class="flex justify-between">
           <span class="text-slate-500">TEAM:</span>
           <span id="receiptTeamName" class="font-bold text-white font-sans"></span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">DEPT:</span>
-          <span id="receiptDept" class="text-slate-300"></span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">LEADER:</span>
-          <span id="receiptLeader" class="text-slate-300"></span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-500">PS CODE:</span>

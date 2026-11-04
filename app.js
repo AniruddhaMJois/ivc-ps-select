@@ -634,30 +634,22 @@ function confirmSelectFromModal() {
  * Step 1: Initiate Problem Statement Claim Flow
  * Validates team information and prompts confirmation modal
  */
+/**
+ * Step 1: Initiate Problem Statement Claim Flow
+ * Validates team name and prompts confirmation modal
+ */
 function initiateClaim(psCode) {
-  const teamName = (document.getElementById('inputTeamName').value || '').trim();
-  const dept = (document.getElementById('inputDepartment').value || '').trim();
-  const leaderName = (document.getElementById('inputLeaderName').value || '').trim();
-  const leaderContact = (document.getElementById('inputLeaderContact').value || '').trim();
+  const teamNameInput = document.getElementById('inputTeamName');
+  const teamName = (teamNameInput ? teamNameInput.value : '').trim();
 
   // Validate Team Name
   if (!teamName) {
-    showToast("Please enter your Team Name in Step 1 first!", "error");
-    document.getElementById('inputTeamName').focus();
-    return;
-  }
-
-  // Validate Leader Name
-  if (!leaderName) {
-    showToast("Please enter your Team Leader Name!", "error");
-    document.getElementById('inputLeaderName').focus();
-    return;
-  }
-
-  // Validate Contact
-  if (!leaderContact) {
-    showToast("Please enter Leader Contact / WhatsApp number!", "error");
-    document.getElementById('inputLeaderContact').focus();
+    showToast("Please enter your Team Name above first!", "error");
+    if (teamNameInput) {
+      teamNameInput.focus();
+      teamNameInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-500');
+      setTimeout(() => teamNameInput.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500'), 2500);
+    }
     return;
   }
 
@@ -676,12 +668,11 @@ function initiateClaim(psCode) {
   }
 
   // Save entered team details to localStorage
-  saveTeamInfo(teamName, dept, leaderName, leaderContact);
+  saveTeamInfo(teamName);
 
   // Setup Confirmation Modal
   pendingClaimPS = ps;
   document.getElementById('confirmTeam').textContent = teamName;
-  document.getElementById('confirmDept').textContent = dept;
   document.getElementById('confirmPsCode').textContent = `${ps.code} (${ps.sihNo})`;
   document.getElementById('confirmPsTitle').textContent = ps.title;
 
@@ -703,9 +694,6 @@ async function executeClaim() {
 
   const ps = pendingClaimPS;
   const teamName = (document.getElementById('inputTeamName').value || '').trim();
-  const dept = (document.getElementById('inputDepartment').value || '').trim();
-  const leaderName = (document.getElementById('inputLeaderName').value || '').trim();
-  const leaderContact = (document.getElementById('inputLeaderContact').value || '').trim();
 
   const submitBtn = document.getElementById('finalSubmitBtn');
   const btnSpinner = document.getElementById('btnSpinner');
@@ -720,9 +708,9 @@ async function executeClaim() {
     action: 'claim',
     psCode: ps.code,
     teamName: teamName,
-    department: dept,
-    leaderName: leaderName,
-    leaderContact: leaderContact,
+    department: '',
+    leaderName: '',
+    leaderContact: '',
     timestamp: new Date().toISOString()
   };
 
@@ -742,13 +730,13 @@ async function executeClaim() {
       } catch (postErr) {
         console.warn("POST attempt had network issue, trying GET claim fallback...", postErr);
         // Fallback Attempt: GET claim query param
-        const getUrl = `${appsScriptUrl}?action=claim&teamName=${encodeURIComponent(teamName)}&department=${encodeURIComponent(dept)}&leaderName=${encodeURIComponent(leaderName)}&leaderContact=${encodeURIComponent(leaderContact)}&psCode=${encodeURIComponent(ps.code)}&_t=${Date.now()}`;
+        const getUrl = `${appsScriptUrl}?action=claim&teamName=${encodeURIComponent(teamName)}&psCode=${encodeURIComponent(ps.code)}&_t=${Date.now()}`;
         const getRes = await fetch(getUrl, { method: 'GET', mode: 'cors' });
         result = await getRes.json();
       }
 
       if (result && result.success) {
-        handleSuccessfulClaim(ps, teamName, dept, leaderName, leaderContact, result.data?.timestamp);
+        handleSuccessfulClaim(ps, teamName, result.data?.timestamp);
       } else {
         const msg = result ? result.message : "Selection could not be locked.";
         showToast(`Selection Failed: ${msg}`, "error");
@@ -780,29 +768,28 @@ async function executeClaim() {
       }
 
       const timestamp = new Date().toLocaleString();
-      mockClaims[ps.code] = { teamName, dept, leaderName, leaderContact, timestamp };
+      mockClaims[ps.code] = { teamName, timestamp };
       localStorage.setItem('ivc_mock_claims', JSON.stringify(mockClaims));
 
-      handleSuccessfulClaim(ps, teamName, dept, leaderName, leaderContact, timestamp);
+      handleSuccessfulClaim(ps, teamName, timestamp);
 
       submitBtn.disabled = false;
       if (btnSpinner) btnSpinner.classList.add('hidden');
       if (btnText) btnText.textContent = "Confirm & Lock PS";
       closeConfirmModal();
-    }, 800);
+    }, 600);
   }
 }
 
 /**
  * Handle Successful Claim Execution
  */
-function handleSuccessfulClaim(ps, teamName, dept, leaderName, leaderContact, timestamp) {
+function handleSuccessfulClaim(ps, teamName, timestamp) {
   const tsStr = timestamp || new Date().toLocaleString();
 
   // 1. Update In-Memory State
   ps.status = 'Claimed';
   ps.claimedBy = teamName;
-  ps.department = dept;
   ps.claimedAt = tsStr;
 
   // 2. Persist to localStorage
@@ -813,9 +800,6 @@ function handleSuccessfulClaim(ps, teamName, dept, leaderName, leaderContact, ti
     domain: ps.domain,
     category: ps.category,
     teamName: teamName,
-    department: dept,
-    leaderName: leaderName,
-    leaderContact: leaderContact,
     timestamp: tsStr
   };
   localStorage.setItem('ivc_user_claimed_ps', JSON.stringify(userClaimedPS));
@@ -848,11 +832,9 @@ function updateClaimedBanner() {
       lockNotice.classList.remove('hidden');
     }
 
-    // Disable form edits once claimed
-    ['inputTeamName', 'inputDepartment', 'inputLeaderName', 'inputLeaderContact'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.disabled = true;
-    });
+    // Disable team name input once claimed
+    const el = document.getElementById('inputTeamName');
+    if (el) el.disabled = true;
   } else {
     if (banner) banner.classList.add('hidden');
     if (lockNotice) lockNotice.classList.add('hidden');
@@ -866,8 +848,6 @@ function showClaimReceiptModal() {
   if (!userClaimedPS) return;
 
   document.getElementById('receiptTeamName').textContent = userClaimedPS.teamName;
-  document.getElementById('receiptDept').textContent = userClaimedPS.department;
-  document.getElementById('receiptLeader').textContent = `${userClaimedPS.leaderName} (${userClaimedPS.leaderContact})`;
   document.getElementById('receiptPsCode').textContent = userClaimedPS.psCode;
   document.getElementById('receiptSihNo').textContent = userClaimedPS.sihNo;
   document.getElementById('receiptTitle').textContent = userClaimedPS.title;
@@ -884,9 +864,9 @@ function closeReceiptModal() {
 /**
  * Team Info LocalStorage Helpers
  */
-function saveTeamInfo(teamName, dept, leaderName, leaderContact) {
+function saveTeamInfo(teamName) {
   try {
-    localStorage.setItem('ivc_team_info', JSON.stringify({ teamName, dept, leaderName, leaderContact }));
+    localStorage.setItem('ivc_team_info', JSON.stringify({ teamName }));
   } catch (e) {}
 }
 
@@ -895,10 +875,10 @@ function loadSavedTeamInfo() {
     const saved = localStorage.getItem('ivc_team_info');
     if (saved) {
       const info = JSON.parse(saved);
-      if (info.teamName) document.getElementById('inputTeamName').value = info.teamName;
-      if (info.dept) document.getElementById('inputDepartment').value = info.dept;
-      if (info.leaderName) document.getElementById('inputLeaderName').value = info.leaderName;
-      if (info.leaderContact) document.getElementById('inputLeaderContact').value = info.leaderContact;
+      if (info.teamName) {
+        const input = document.getElementById('inputTeamName');
+        if (input) input.value = info.teamName;
+      }
     }
   } catch (e) {}
 }
