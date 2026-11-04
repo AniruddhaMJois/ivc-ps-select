@@ -20,7 +20,7 @@
         VICE VERSE 2026 - Problem Statement Selection
       </h1>
       <p class="text-sm text-slate-400">
-        Enter your team name and select a Problem Statement. <strong>Up to 2 teams can select each problem statement</strong>.
+        Enter your password and select a Problem Statement. <strong>Up to 2 teams can select each problem statement</strong>.
       </p>
       
       <!-- Live Sync Status -->
@@ -30,15 +30,15 @@
       </div>
     </div>
 
-    <!-- Step 1: Team Name Input Card -->
+    <!-- Step 1: Password Input Card -->
     <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-xl max-w-xl mx-auto">
       <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 text-center">
-        Enter Your Team Name <span class="text-red-400">*</span>
+        ENTER PASSWORD <span class="text-red-400">*</span>
       </label>
-      <input type="text" id="teamNameInput" placeholder="e.g., Team Innovators" 
+      <input type="text" id="teamNameInput" placeholder="Enter password here..." 
         class="w-full bg-slate-950 border-2 border-slate-600 focus:border-blue-500 rounded-xl px-4 py-3 text-base text-white text-center font-bold tracking-wide outline-none transition placeholder-slate-500">
       <p id="selectionNotice" class="text-xs text-center text-slate-400 mt-2">
-        Rule: Each Problem Statement has <strong>2 Slots</strong>. Each team can select strictly <strong>1 PS</strong>.
+        Rule: Each Problem Statement has <strong>2 Slots</strong>. Each password can select strictly <strong>1 PS</strong>.
       </p>
     </div>
 
@@ -309,7 +309,7 @@
       const teamName = (teamInput.value || "").trim();
 
       if (!teamName) {
-        showToast("Please enter your Team Name first!", "error");
+        showToast("Please enter password first!", "error");
         teamInput.focus();
         teamInput.classList.add("border-red-500");
         setTimeout(() => teamInput.classList.remove("border-red-500"), 2000);
@@ -317,11 +317,11 @@
       }
 
       if (myClaimedPS) {
-        showToast(`Your team already selected PS [${myClaimedPS}]!`, "error");
+        showToast(`You have already selected PS [${myClaimedPS}]!`, "error");
         return;
       }
 
-      const confirmed = confirm(`Are you sure team "${teamName}" wants to select ${psCode}?\nThis will record it in Google Sheets.`);
+      const confirmed = confirm(`Are you sure you want to select ${psCode}?\nThis will record it in Google Sheets.`);
       if (!confirmed) return;
 
       showToast(`Saving to Google Sheets...`, "info");
@@ -339,7 +339,7 @@
           localStorage.setItem("ivc_my_claimed_ps", psCode);
           localStorage.setItem("ivc_my_team_name", teamName);
 
-          showToast(`SUCCESS! Problem Statement ${psCode} assigned to "${teamName}"!`, "success");
+          showToast(`SUCCESS! Problem Statement ${psCode} locked!`, "success");
           lockUIForClaimed(psCode, teamName);
           fetchLiveSheetData();
         } else {
@@ -372,7 +372,7 @@
       if (input) input.disabled = true;
       const notice = document.getElementById("selectionNotice");
       if (notice) {
-        notice.innerHTML = `<span class="text-emerald-400 font-bold">✓ Team "${teamName}" selected PS [${psCode}].</span>`;
+        notice.innerHTML = `<span class="text-emerald-400 font-bold">✓ Selected PS [${psCode}].</span>`;
       }
     }
 
