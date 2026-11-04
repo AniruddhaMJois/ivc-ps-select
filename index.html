@@ -20,7 +20,7 @@
         Problem Statement Selection
       </h1>
       <p class="text-sm text-slate-400">
-        Enter your team name, pick an available problem statement from the table below, and lock it into Google Sheets.
+        Enter your team name and select a Problem Statement. <strong>Up to 2 teams can select each problem statement</strong>.
       </p>
       
       <!-- Live Sync Status -->
@@ -38,7 +38,7 @@
       <input type="text" id="teamNameInput" placeholder="e.g., Team Innovators" 
         class="w-full bg-slate-950 border-2 border-slate-600 focus:border-blue-500 rounded-xl px-4 py-3 text-base text-white text-center font-bold tracking-wide outline-none transition placeholder-slate-500">
       <p id="selectionNotice" class="text-xs text-center text-slate-400 mt-2">
-        Note: Strictly <strong>1 team can only select 1 Problem Statement</strong>.
+        Rule: Each Problem Statement has <strong>2 Slots</strong>. Each team can select strictly <strong>1 PS</strong>.
       </p>
     </div>
 
@@ -78,12 +78,11 @@
             <th class="p-3 w-40">Domain</th>
             <th class="p-3">Problem Statement Title</th>
             <th class="p-3 text-center w-24">Category</th>
-            <th class="p-3 text-center w-36">Status</th>
-            <th class="p-3 text-center w-32">Action</th>
+            <th class="p-3 text-center w-48">Slots & Status (Max 2)</th>
+            <th class="p-3 text-center w-36">Action</th>
           </tr>
         </thead>
         <tbody id="tableBody" class="divide-y divide-slate-700/60">
-          <!-- Populated by JavaScript -->
           <tr>
             <td colspan="6" class="p-6 text-center text-slate-400">Loading Problem Statements...</td>
           </tr>
@@ -102,12 +101,12 @@
   <script src="data.js"></script>
 
   <script>
-    // Live Google Apps Script Web App URL
     const API_URL = "https://script.google.com/macros/s/AKfycby2lVoTD8_XBDZ2UH1wfeD6RDCdbF7cnTIKQIpUJTmNLjKAuv25yXKNYYPRjC2N2FWmjA/exec";
 
     let problemStatements = [];
     let currentFilter = "ALL";
     let myClaimedPS = localStorage.getItem("ivc_my_claimed_ps") || null;
+    const MAX_PER_PS = 2; // Up to 2 teams per PS
 
     document.addEventListener("DOMContentLoaded", () => {
       // Load saved team name
@@ -126,8 +125,7 @@
           domain: p.domain,
           title: p.title,
           category: p.category,
-          status: "Available",
-          teamName: ""
+          teams: [] // Array of teams that have chosen this PS
         }));
         renderTable();
       }
@@ -150,27 +148,23 @@
           claims = json.data.filter(d => d.teamName).map(d => ({ psCode: d.code, teamName: d.teamName }));
         }
 
+        // Map PS codes to list of teams
         const map = new Map();
         claims.forEach(item => {
           if (item.psCode) {
-            map.set(item.psCode.toUpperCase(), item.teamName);
+            const key = item.psCode.toUpperCase();
+            if (!map.has(key)) map.set(key, []);
+            map.get(key).push(item.teamName);
           }
         });
 
         problemStatements.forEach(ps => {
-          const takenBy = map.get(ps.code.toUpperCase());
-          if (takenBy) {
-            ps.status = "Taken";
-            ps.teamName = takenBy;
-          } else {
-            ps.status = "Available";
-            ps.teamName = "";
-          }
+          ps.teams = map.get(ps.code.toUpperCase()) || [];
         });
 
         renderTable();
         document.getElementById("syncDot").className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-        document.getElementById("syncText").textContent = "Connected & Synced";
+        document.getElementById("syncText").textContent = "Connected & Synced (Max 2 Teams per PS)";
 
       } catch (err) {
         document.getElementById("syncDot").className = "w-2.5 h-2.5 rounded-full bg-amber-400";
@@ -213,18 +207,61 @@
       }
 
       tbody.innerHTML = filtered.map(ps => {
-        const isTaken = ps.status === "Taken" || !!ps.teamName;
+        const teamCount = ps.teams ? ps.teams.length : 0;
+        const isFull = teamCount >= MAX_PER_PS;
         const isMyTeam = myClaimedPS === ps.code;
 
         // Row background
         let rowClass = "hover:bg-slate-700/40 transition";
-        if (isTaken) rowClass = "bg-slate-900/50 opacity-60";
+        if (isFull) rowClass = "bg-slate-900/50 opacity-60";
         if (isMyTeam) rowClass = "bg-emerald-950/30 border border-emerald-500/40 opacity-100";
 
         // Domain badge color
         let domainColor = "text-blue-400 bg-blue-500/10 border-blue-500/20";
         if (ps.domain.includes("Electronics")) domainColor = "text-purple-400 bg-purple-500/10 border-purple-500/20";
         if (ps.domain.includes("Mechanical") || ps.domain.includes("Civil")) domainColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+
+        // Status Badge Logic (0/2, 1/2, or 2/2 Full)
+        let statusBadge = "";
+        let actionBtn = "";
+
+        if (teamCount === 0) {
+          // 0 of 2 slots taken -> Completely Available
+          statusBadge = `
+            <span class="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 text-[11px] font-bold">
+              Available (0/2)
+            </span>
+          `;
+          actionBtn = `
+            <button onclick="selectPS('${ps.code}')" class="w-full py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs shadow-md transition">
+              Select PS
+            </button>
+          `;
+        } else if (teamCount === 1) {
+          // 1 of 2 slots taken -> 1 Slot Left (Still Clickable!)
+          statusBadge = `
+            <span class="px-2.5 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-800 text-[11px] font-bold" title="Taken by: ${ps.teams[0]}">
+              1 Slot Left (${ps.teams[0]})
+            </span>
+          `;
+          actionBtn = `
+            <button onclick="selectPS('${ps.code}')" class="w-full py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold text-xs shadow-md transition">
+              Select (1 Left)
+            </button>
+          `;
+        } else {
+          // 2 of 2 slots taken -> FULL & UNCLICKABLE
+          statusBadge = `
+            <span class="px-2.5 py-1 rounded-full bg-red-950 text-red-300 border border-red-800 text-[11px] font-bold" title="Taken by: ${ps.teams.join(', ')}">
+              Full 2/2 (${ps.teams.join(', ')})
+            </span>
+          `;
+          actionBtn = `
+            <button disabled aria-disabled="true" class="w-full py-1.5 px-3 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs cursor-not-allowed pointer-events-none select-none opacity-50">
+              🔒 Full (2/2)
+            </button>
+          `;
+        }
 
         return `
           <tr class="${rowClass}">
@@ -252,30 +289,14 @@
               </span>
             </td>
 
-            <!-- Status -->
+            <!-- Status (Slots 0/2, 1/2, 2/2) -->
             <td class="p-3 text-center whitespace-nowrap">
-              ${isTaken ? `
-                <span class="px-2.5 py-1 rounded-full bg-red-950 text-red-300 border border-red-800 text-[11px] font-bold">
-                  Taken (${ps.teamName || 'Claimed'})
-                </span>
-              ` : `
-                <span class="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 text-[11px] font-bold">
-                  Available
-                </span>
-              `}
+              ${statusBadge}
             </td>
 
-            <!-- Action Button (UNCLICKABLE when Taken) -->
+            <!-- Action Button (UNCLICKABLE ONLY WHEN 2 TEAMS TAKE IT) -->
             <td class="p-3 text-center whitespace-nowrap">
-              ${isTaken ? `
-                <button disabled aria-disabled="true" class="w-full py-1.5 px-3 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs cursor-not-allowed pointer-events-none select-none">
-                  🔒 Taken
-                </button>
-              ` : `
-                <button onclick="selectPS('${ps.code}')" class="w-full py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs shadow-md transition">
-                  Select PS
-                </button>
-              `}
+              ${actionBtn}
             </td>
           </tr>
         `;
@@ -300,7 +321,7 @@
         return;
       }
 
-      const confirmed = confirm(`Are you sure you want to select ${psCode} for team "${teamName}"?\nThis will lock it in Google Sheets.`);
+      const confirmed = confirm(`Are you sure team "${teamName}" wants to select ${psCode}?\nThis will record it in Google Sheets.`);
       if (!confirmed) return;
 
       showToast(`Saving to Google Sheets...`, "info");
@@ -318,7 +339,7 @@
           localStorage.setItem("ivc_my_claimed_ps", psCode);
           localStorage.setItem("ivc_my_team_name", teamName);
 
-          showToast(`SUCCESS! Problem Statement ${psCode} locked for "${teamName}"!`, "success");
+          showToast(`SUCCESS! Problem Statement ${psCode} assigned to "${teamName}"!`, "success");
           lockUIForClaimed(psCode, teamName);
           fetchLiveSheetData();
         } else {
@@ -335,7 +356,7 @@
             myClaimedPS = psCode;
             localStorage.setItem("ivc_my_claimed_ps", psCode);
             localStorage.setItem("ivc_my_team_name", teamName);
-            showToast(`SUCCESS! Problem Statement ${psCode} locked!`, "success");
+            showToast(`SUCCESS! Problem Statement ${psCode} assigned!`, "success");
             lockUIForClaimed(psCode, teamName);
             fetchLiveSheetData();
             return;

@@ -1,13 +1,15 @@
 /**
  * =========================================================================
  * IDEATHON 2025 - VVCE MYSURU
- * SIMPLE 2-COLUMN GOOGLE APPS SCRIPT
+ * 2 TEAMS PER PROBLEM STATEMENT SELECTOR
  * Columns: Team Name | Problem Statement
  * =========================================================================
  */
 
+const MAX_TEAMS_PER_PS = 2; // Up to 2 teams can select each PS
+
 /**
- * 1. Setup the 2-column sheet (Run once or let it auto-initialize)
+ * 1. Setup the 2-column sheet (Run once)
  */
 function setupSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -28,13 +30,12 @@ function setupSheet() {
 }
 
 /**
- * 2. GET API: Reads the 2-column sheet and returns which PS are taken
+ * 2. GET API: Reads the 2-column sheet and returns claims & slot counts
  */
 function doGet(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getActiveSheet();
   
-  // Auto-setup header if sheet is completely empty
   if (sheet.getLastRow() === 0) {
     setupSheet();
   }
@@ -42,16 +43,16 @@ function doGet(e) {
   const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : "getClaims";
 
   if (action === "ping") {
-    return sendJson({ status: "ok", message: "2-Column Sheet API is Online" });
+    return sendJson({ status: "ok", message: "2-Teams-per-PS API is Online" });
   }
 
   if (action === "claim") {
     return handleClaim(e.parameter.teamName, e.parameter.psCode);
   }
 
-  // Return all claims from the 2-column sheet
+  // Read all rows
   const claims = getClaimedList(sheet);
-  return sendJson({ success: true, claimed: claims });
+  return sendJson({ success: true, claimed: claims, maxPerPs: MAX_TEAMS_PER_PS });
 }
 
 /**
@@ -77,7 +78,7 @@ function doPost(e) {
 }
 
 /**
- * 4. ATOMIC CLAIM: Appends [Team Name, PS Code] with concurrency locking
+ * 4. ATOMIC CLAIM: Allows up to 2 TEAMS per Problem Statement
  */
 function handleClaim(teamName, psCode) {
   teamName = (teamName || "").trim();
@@ -105,42 +106,52 @@ function handleClaim(teamName, psCode) {
     }
 
     const lastRow = sheet.getLastRow();
-    
-    // If there are existing records, check for duplicates
+    let psCount = 0;
+    const existingTeamsForThisPs = [];
+
     if (lastRow > 1) {
       const data = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
 
       for (let i = 0; i < data.length; i++) {
-        const rowTeam = (data[i][0] || "").toString().trim().toLowerCase();
+        const rowTeam = (data[i][0] || "").toString().trim();
         const rowPs = (data[i][1] || "").toString().trim().toUpperCase();
 
-        // Check if team already claimed a PS
-        if (rowTeam === teamName.toLowerCase()) {
+        // 1. Strict check: Team cannot select multiple PS
+        if (rowTeam.toLowerCase() === teamName.toLowerCase()) {
           return sendJson({
             success: false,
             message: 'Team "' + teamName + '" has already selected PS [' + rowPs + ']! Only 1 PS per team.'
           });
         }
 
-        // Check if this PS is already taken by another team
+        // Count how many teams have already chosen this PS
         if (rowPs === psCode) {
-          return sendJson({
-            success: false,
-            message: 'Problem Statement [' + psCode + '] is ALREADY TAKEN by team "' + data[i][0] + '"!'
-          });
+          psCount++;
+          existingTeamsForThisPs.push(rowTeam);
         }
+      }
+
+      // 2. Strict check: Max 2 teams per PS
+      if (psCount >= MAX_TEAMS_PER_PS) {
+        return sendJson({
+          success: false,
+          message: 'Problem Statement [' + psCode + '] is ALREADY FULL! (Chosen by ' + existingTeamsForThisPs.join(' and ') + '). Maximum ' + MAX_TEAMS_PER_PS + ' teams allowed.'
+        });
       }
     }
 
-    // Append to the 2 columns: Column A = Team Name, Column B = PS Code
+    // Append directly: Column A = Team Name, Column B = PS Code
     sheet.appendRow([teamName, psCode]);
     SpreadsheetApp.flush();
 
+    const slotsLeft = MAX_TEAMS_PER_PS - (psCount + 1);
+
     return sendJson({
       success: true,
-      message: 'Successfully assigned PS [' + psCode + '] to team "' + teamName + '"!',
+      message: 'Successfully assigned PS [' + psCode + '] to team "' + teamName + '"! (' + (slotsLeft === 0 ? 'Now FULL' : '1 slot remaining') + ')',
       teamName: teamName,
-      psCode: psCode
+      psCode: psCode,
+      slotsLeft: slotsLeft
     });
 
   } catch (err) {
@@ -151,7 +162,7 @@ function handleClaim(teamName, psCode) {
 }
 
 /**
- * Helper to get list of claimed rows
+ * Helper to read claimed rows
  */
 function getClaimedList(sheet) {
   const lastRow = sheet.getLastRow();
